@@ -535,19 +535,21 @@ if __name__ == '__main__':
     df_p_tbias.to_csv(path.join(plot_dir, "pvals_turnbias.csv"))
 
     # augment bouts with reversal information and save fish and bout dataframes
-    # temp_aln_distribution = {"Treatment": [], "Gradient alignment": []}
-    # for k in val_fever_bouts:
-    #     for bout, fish, ename in zip(val_fever_bouts[k], val_fever_fish[k], val_fever_expnames[k]):
-    #         bout = utils.augment_state_info(bout, align_thresh, max_reversal_length)
-    #         grad_direction = np.array(bout["Gradient direction"])
-    #         b_temps = bout["Temperature"]
-    #         a_hist = np.histogram(b_temps, bins=temp_bins, weights=np.abs(grad_direction))[0].astype(float)
-    #         n_hist = np.histogram(b_temps, bins=temp_bins)[0].astype(float)
-    #         temp_aln_distribution["Gradient alignment"].append(a_hist / n_hist)
-    #         temp_aln_distribution["Treatment"].append(k)
-    #         e_base = path.split(ename)[1]
-    #         if not path.exists(path.join(plot_dir, k.replace(':', '_'))):
-    #             os.makedirs(path.join(plot_dir, k.replace(':', '_')))
-    #         save_base = path.join(path.join(plot_dir, k.replace(':', '_')), e_base)
-    #         bout.to_pickle(f"{save_base}_bout.pkl")
-    #         fish.to_pickle(f"{save_base}_fish.pkl")
+    max_reversal_length = 10
+    align_thresh = 0.71  # within a cone of cos(alpha)>=align_thresh we consider bouts to be aligned to the gradient
+    temp_aln_distribution = {"Treatment": [], "Gradient alignment": []}
+    for k in val_fever_bouts:
+        for bout, fish, ename in zip(val_fever_bouts[k], val_fever_fish[k], val_fever_expnames[k]):
+            bout = utils.augment_state_info(bout, align_thresh, max_reversal_length)
+            grad_direction = np.array(bout["Gradient direction"])
+            b_temps = bout["Temperature"]
+            a_hist = np.histogram(b_temps, bins=temp_bins, weights=np.abs(grad_direction))[0].astype(float)
+            n_hist = np.histogram(b_temps, bins=temp_bins)[0].astype(float)
+            temp_aln_distribution["Gradient alignment"].append(a_hist / n_hist)
+            temp_aln_distribution["Treatment"].append(k)
+            e_base = path.split(ename)[1]
+            if not path.exists(path.join(plot_dir, k.replace(':', '_'))):
+                os.makedirs(path.join(plot_dir, k.replace(':', '_')))
+            save_base = path.join(path.join(plot_dir, k.replace(':', '_')), e_base)
+            bout.to_pickle(f"{save_base}_bout.pkl")
+            fish.to_pickle(f"{save_base}_fish.pkl")
